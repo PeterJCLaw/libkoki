@@ -18,7 +18,7 @@
 
 
 
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <GL/glut.h>
 #include <cv.h>
@@ -183,6 +183,8 @@ void display()
 	}
 	//printf("num markers: %d\n", markers->len);
 
+	bool saw_bad_token = false;
+
 	/* draw markers */
 	for (int i=0; i<markers->len; i++){
 		koki_marker_t *marker;
@@ -206,6 +208,11 @@ void display()
 
 		printf("Distance: %fm\n\n", marker->distance);
 
+		if (marker->code < 30){
+			saw_bad_token = true;
+			cvSaveImage("bad-token.jpg", frame, 0);
+		}
+
 	}
 
 	 koki_markers_free(markers);
@@ -216,6 +223,9 @@ void display()
 	cvReleaseImage(&gs);
 	glutSwapBuffers();
 
+	if (saw_bad_token){
+		exit(1);
+	}
 }
 
 
