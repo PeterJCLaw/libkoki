@@ -210,7 +210,8 @@ void display()
 
 		if (marker->code < 30){
 			saw_bad_token = true;
-			cvSaveImage("bad-token.jpg", frame, 0);
+			cvSaveImage("bad-token.png", frame, 0);
+			cvSaveImage("bad-token-gray.png", gs, 0);
 		}
 
 	}
