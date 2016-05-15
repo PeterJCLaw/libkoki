@@ -486,6 +486,8 @@ int16_t koki_code_recover_from_grid(koki_grid_t *grid, float *rotation_offset)
 
 	assert(grid != NULL);
 
+	koki_grid_print(grid);
+
 	/* get rotations */
 	code_rotations(grid, codes);
 
@@ -493,8 +495,16 @@ int16_t koki_code_recover_from_grid(koki_grid_t *grid, float *rotation_offset)
 	for (uint8_t i=0; i<4; i++){
 
 		data[i] = 0;
-		for (int j=0; j<5; j++)
-			data[i] |= (hamming_decode(codes[i][j]) & 0xF) << (j*4);
+		for (int j=0; j<5; j++){
+
+			uint8_t code = codes[i][j];
+
+			printf("codes[%d][%d]: %d (0x%x)\n",
+			       i, j, code, code);
+
+			data[i] |= (hamming_decode(code) & 0xF) << (j*4);
+
+		}
 
 	}//for
 
@@ -504,6 +514,9 @@ int16_t koki_code_recover_from_grid(koki_grid_t *grid, float *rotation_offset)
 
 		marker_num = MARKER_NUM(data[i]);
 		marker_crc = MARKER_CRC(data[i]);
+
+		printf("data[%d]: %x; num: %d, crc: %d\n",
+		       i, data[i], marker_num, marker_crc);
 
 		/* is it valid? If so, return */
 		if (crc_check(marker_num, marker_crc)){
