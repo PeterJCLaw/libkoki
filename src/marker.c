@@ -123,7 +123,6 @@ bool koki_marker_recover_code( koki_t* koki, koki_marker_t *marker, IplImage *fr
 {
 
 	IplImage *unwarped;
-	IplImage *res;
 	koki_grid_t grid;
 	float rotation;
 	int16_t code;
@@ -140,12 +139,18 @@ bool koki_marker_recover_code( koki_t* koki, koki_marker_t *marker, IplImage *fr
 
 	koki_log( koki, "unwarped marker\n", unwarped );
 
-	/* Adaptively threshold the marker */
-	res = koki_threshold_adaptive( unwarped, 21, 3, KOKI_ADAPTIVE_MEAN );
-	koki_log( koki, "unwarped and thresholded marker\n", res );
+	if (koki_is_logging( koki )){
+		IplImage *res;
+
+		/* Adaptively threshold the marker */
+		res = koki_threshold_adaptive( unwarped, 21, 3, KOKI_ADAPTIVE_MEAN );
+		koki_log( koki, "unwarped and thresholded marker\n", res );
+
+		cvReleaseImage(&res);
+	}
 
 	/* Resulting image is already b&w, so a threshold of 127 will do */
-	koki_grid_from_image(res, 127, &grid);
+	koki_grid_from_image(unwarped, 127, &grid);
 
 	/* recover code */
 	code = koki_code_recover_from_grid(&grid, &rotation);
@@ -154,7 +159,6 @@ bool koki_marker_recover_code( koki_t* koki, koki_marker_t *marker, IplImage *fr
 		koki_log( koki, "Failed to recover code from unwarped marker -- discarding\n", NULL );
 
 		cvReleaseImage(&unwarped);
-		cvReleaseImage(&res);
 
 		return FALSE;
 	}
@@ -167,7 +171,6 @@ bool koki_marker_recover_code( koki_t* koki, koki_marker_t *marker, IplImage *fr
 
 	/* clean up */
 	cvReleaseImage(&unwarped);
-	cvReleaseImage(&res);
 
 	return TRUE;
 
